@@ -1,0 +1,35 @@
+apply plugin: 'com.android.library'
+apply plugin: "maven"
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
+
+    defaultConfig {
+        minSdkVersion 17
+        targetSdkVersion 25
+        versionCode 4
+        versionName "1.0.8"
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            consumerProguardFiles 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'coreutil-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile "com.android.support:support-v4:25.+"
+    compile 'org.jetbrains:annotations-java5:15.0'
+}
+uploadArchives {
+    repositories.mavenDeployer {
+        repository(url: "http://192.168.1.76/nexus/content/repositories/releases") {
+            authentication(userName: "admin", password: "12qw!@!@")
+            pom.groupId = "com.transsion.api"
+            pom.artifactId = "coreutil"
+            pom.version = android.defaultConfig.versionName
+        }
+    }
+}

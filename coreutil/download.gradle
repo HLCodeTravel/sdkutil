@@ -1,0 +1,109 @@
+/**
+ * Download a single file to a directory
+ */
+
+//>>>>>>>>>>>>>>>>>>下载proguard脚本
+task downloadFile(type: MyDownload) {
+  sourceUrl 'http://192.168.10.250:3000/SDK/sdkutil/raw/master/coreutil/proguard-rules.pro'
+  target projectDir
+  download()
+}
+
+class MyDownload extends DefaultTask {
+  @Input
+  String sourceUrl
+
+  @OutputFile
+  File target
+
+  @TaskAction
+  void download() {
+    println "----transsion SDK: download proguard file"
+    println target
+    ant.get(src: sourceUrl, dest: target, skipexisting: false)
+  }
+}
+
+afterEvaluate {
+  tasks.matching {
+    // 以process开头以ReleaseJavaRes或DebugJavaRes结尾的task
+    it.name.startsWith('assemble') && (it.name.endsWith('ReleaseJavaRes') || it.name.endsWith
+            ('DebugJavaRes'))
+  }.each { task ->
+    task.dependsOn(downloadFile)  // 任务依赖：执行task之前需要执行dependsOn指定的任务
+  }
+}
+
+//>>>>>>>>>>>>>>>>>>拷贝mapping文件
+tasks.findByName('uploadArchives').doLast {
+  def time = new Date().format('yyMMddHHmmss')
+    copy {
+      from "./build/outputs/mapping/release/mapping.txt"
+      into "\\\\192.168.1.78\\file-share\\SDKTeam\\mapping\\${project.name}\\${android.defaultConfig.versionName}"
+      rename {
+        "mapping_${time}.txt"
+      }
+    }
+  copy {
+    from "./build.gradle"
+    into "\\\\192.168.1.78\\file-share\\SDKTeam\\mapping\\${project.name}\\${android.defaultConfig.versionName}"
+    rename {
+      "build_${time}.gradle"
+    }
+  }
+  copy {
+    from "./build/outputs/aar/${project.name}-release.aar"
+    into "\\\\\\\\192.168.1.78\\\\file-share\\\\SDKTeam\\\\mapping\\\\${project.name}\\${android.defaultConfig.versionName}"
+    rename {
+      "${project.name}_${time}.aar"
+    }
+  }
+}
+
+//>>>>>>>>>>>>>>>>>>输出编译时间
+class TimingsListener implements TaskExecutionListener, BuildListener {
+  private Clock clock
+  private timings = []
+
+  @Override
+  void beforeExecute(Task task) {
+    clock = new org.gradle.util.Clock()
+  }
+  @Override
+  void afterExecute(Task task, TaskState taskState) {
+    def ms = clock.timeInMs
+    timings.add([ms, task.path])
+    task.project.logger.warn "${task.path} took ${ms}ms"
+    if(task.outputs.files.files) {
+      task.project.logger.warn "taskName:${task.name}"
+      task.project.logger.warn "outputs.files.files: ------------start----------------- "
+      task.outputs.files.files.each {
+        task.project.logger.warn "${it.absolutePath} "
+      }
+      task.project.logger.warn "outputs.files.files: ---------------end------------------ "
+    }
+  }
+
+  @Override
+  void buildFinished(BuildResult result) {
+    println "Task timings:"
+    for (timing in timings) {
+      if (timing[0] >= 50) {
+        printf "%7sms  %s\n", timing
+      }
+    }
+  }
+
+  @Override
+  void buildStarted(Gradle gradle) {}
+
+  @Override
+  void projectsEvaluated(Gradle gradle) {}
+
+  @Override
+  void projectsLoaded(Gradle gradle) {}
+
+  @Override
+  void settingsEvaluated(Settings settings) {}
+}
+project.gradle.addListener(new TimingsListener())

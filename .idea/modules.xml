@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/coreutil/coreutil.iml" filepath="$PROJECT_DIR$/coreutil/coreutil.iml" />
+      <module fileurl="file://$PROJECT_DIR$/demo/demo.iml" filepath="$PROJECT_DIR$/demo/demo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/httplibrary/httplibrary.iml" filepath="$PROJECT_DIR$/httplibrary/httplibrary.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sdkutil.iml" filepath="$PROJECT_DIR$/sdkutil.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tranjsonlibrary/tranjsonlibrary.iml" filepath="$PROJECT_DIR$/tranjsonlibrary/tranjsonlibrary.iml" />
+    </modules>
+  </component>
+</project>
